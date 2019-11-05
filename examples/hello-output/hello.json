@@ -1,0 +1,7 @@
+{
+    "outDir":"./output",
+    "name":"hello",
+    "data":{
+        "name":"world"
+    }
+}
