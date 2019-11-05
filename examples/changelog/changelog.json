@@ -1,0 +1,24 @@
+{
+    "outDir":"../../",
+    "jst":"./models/*.jst",
+    "name":"changelog.md",
+    "data":{
+        "appName":"dot-engine",
+        "tags":[{
+            "version":"it will be replaced by src/git.js",
+            "message":"it will be replaced by src/git.js"
+        }]
+    },
+    "process": [
+        {
+            "comment": "collect all tags generated in git and split them betwen version and message",
+            "file": "src/git.js",
+            "args":{
+                "gitpath":"../../../",
+                "comment": "each named capturing group of the regex will become a attribute inside tags. You can addapt this regex so it can match your needs",
+                "regex":"(?<version>((\\d\\.\\d(\\.\\d)?)([-\\w]*)))\\s+(?<message>.+)",
+                "regexop":"gm"
+            }
+        }
+    ]
+}
