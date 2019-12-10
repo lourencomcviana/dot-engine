@@ -9,6 +9,7 @@
   "author": "",
   "license": "GNU",
   "dependencies": {
+    "moment": "^2.24.0",
     "simple-git": "^1.126.0"
   }
 }
