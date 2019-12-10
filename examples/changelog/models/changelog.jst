@@ -4,7 +4,7 @@
 {{=value.message}}
 {{~value.commits.all :commit:idx}}
 - {{=commit.dateFormated}} {{=commit.author_name}}: {{=commit.message}} {{? commit.body }}
-  ```
-  {{=commit.body}}
-  ```{{?}}{{~}}
+```
+{{=commit.body}}
+```{{?}}{{~}}
 {{~}}

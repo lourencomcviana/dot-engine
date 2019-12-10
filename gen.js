@@ -157,7 +157,19 @@ function processArgv(config){
                 let value = keyvalue[1].trim();
                 objectPath.set(config.data,key,value);
             }
-            
+            if(arg.startsWith("--")){
+                let keyvalue = arg.split("=");
+                if(keyvalue.length>0 && keyvalue[0]!=''){
+                    if(keyvalue.length==1){
+                        keyvalue.push("");
+                    }
+                    let key = keyvalue[0].trim().replace(/^--/,'');
+                    let value = keyvalue[1].trim();
+                    config.process.forEach(process =>{
+                        objectPath.set(process.args,key,value);
+                    })
+                }
+            }
         }
     })
 }

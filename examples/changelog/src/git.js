@@ -14,12 +14,15 @@ function processData(data,args,config){
     const regex = new RegExp(args.regex, args.regexop);
 
     const gitUrl = path.resolve(config.this,args.gitpath);
+    config.outDir = gitUrl; 
     return filterSqlFiles(gitUrl)
         .then(tags=> tags
             .map(file=> getTagMessage(file,regex)))
-        .then(tags =>  data.tags = tags)
+        .then(tags =>  data.tags = tags.sort(orderByTag))
         .then(tags => args.detailed ? insertCommitOnTags(tags,gitUrl) : tags.commits=[])
         .catch(err=>{ console.error(err); return []});
+
+  
     
 }
 
@@ -90,4 +93,26 @@ function getTagMessage(str,regex){
 
 
 
-//processData({tag:{old:'1.6.0-0259'}})
+function orderByTag(a,b){
+    const aVersion =  a.version.split(/[.-]/g);
+    const bVersion =  b.version.split(/[.-]/g);
+
+    return compareArrays(aVersion,bVersion);
+}
+
+function compareArrays(a,b){
+    const aCompare = a.shift() * 1;
+    const bCompare = b.shift() * 1;
+    
+    if(aCompare !== bCompare){
+        return aCompare - bCompare;
+    } else if(a.length>0 && b.length>0){
+        return compareArrays(a,b);
+    } else if(a.length>0 && b.length===0){ 
+        return 1;
+    } else if(a.length===0 && b.length>0){ 
+        return -1;
+    }else {
+        return 0;
+    }
+}
