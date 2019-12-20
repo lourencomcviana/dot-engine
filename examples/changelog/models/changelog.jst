@@ -3,7 +3,8 @@
 ## Release {{=value.version}}
 {{=value.message}}
 {{~value.commits.all :commit:idx}}
-- {{=commit.dateFormated}} {{=commit.author_name}}: {{=commit.message}} {{? commit.body }}
+- [{{=commit.dateFormated}} {{=commit.author_name}}]({{=it.branch.remote.url}}/commit/{{=commit.hash}}): {{=commit.message}} {{? commit.body }}
+
 ```
 {{=commit.body}}
 ```{{?}}{{~}}

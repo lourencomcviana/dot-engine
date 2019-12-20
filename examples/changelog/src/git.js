@@ -15,12 +15,18 @@ function processData(data,args,config){
 
     const gitUrl = path.resolve(config.this,args.gitpath);
     config.outDir = gitUrl; 
-    return filterSqlFiles(gitUrl)
-        .then(tags=> tags
-            .map(file=> getTagMessage(file,regex)))
-        .then(tags =>  data.tags = tags.sort(orderByTag))
-        .then(tags => args.detailed ? insertCommitOnTags(tags,gitUrl) : tags.commits=[])
-        .catch(err=>{ console.error(err); return []});
+
+    return getBranchInfo(gitUrl)
+        .then(item => data.branch=item)
+        .then(()=>{
+            return filterSqlFiles(gitUrl)
+                .then(tags=> tags
+                    .map(file=> getTagMessage(file,regex)))
+                .then(tags =>  data.tags = tags.sort(orderByTag))
+                .then(tags => args.detailed ? insertCommitOnTags(tags,gitUrl) : tags.commits=[])
+                .catch(err=>{ console.error(err); return []});
+        }).catch(err=>{ console.error(err); return []});
+    
 
   
     
@@ -67,7 +73,7 @@ async function commitsBetweenTags(startTag,endTag,gitUrl,boundary){
 
 async function parseCommitLine(commit){
     commit.all.forEach(element => {
-        element.dateFormated = moment(commit.date).format('DD/MM/YYYY hh:mm:ss')
+        element.dateFormated = moment(element.date,'YYYY-MM-DD hh:mm:ss').format('DD/MM/YYYY hh:mm:ss')
     });
     return Promise.resolve(commit);
 
@@ -79,6 +85,48 @@ function filterSqlFiles(giturl,regex){
     return simpleGit.tag(['-n'])
         .then(saida => saida.split("\n").filter(item =>item))
     
+}
+
+function getBranchInfo(giturl){
+    const simpleGit = require('simple-git/promise')(giturl);
+
+    return simpleGit.branch(["-vv"])
+        .then(item => {
+            const currentItem =  item.branches[item.current];
+            setBranchRemoteData(currentItem);
+            return currentItem;
+        })
+        .then(branch =>{
+            return simpleGit.remote(["get-url",branch.remote.name]).then(remotes =>{
+                remotes = remotes.trim();
+                remotes = remotes.substring(0,remotes.length-4)
+                branch.remote.url = remotes;
+                return branch;
+            });
+        })
+    ;
+}
+
+function setBranchRemoteData(branch){
+    const regex = /\[(.+)\/(.+)\] *(.+)/gm;
+    const str = branch.label;
+
+    let m = regex.exec(str);
+
+    if(m.length>=3){
+        branch.remote ={
+            name: m[1],
+            branch: m[2]
+        } 
+    } else {
+        branch.remote ={
+            name: undefined,
+            branch: undefined
+        } 
+    }
+
+
+
 }
 
 function getTagMessage(str,regex){

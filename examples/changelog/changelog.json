@@ -5,6 +5,7 @@
     "data":{
         "appName":"dot-engine",
         
+        "branch":"current branch info will be inputed here",
         "tags":[{
             "version":"it will be replaced by src/git.js",
             "message":"it will be replaced by src/git.js"
