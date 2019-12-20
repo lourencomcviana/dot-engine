@@ -19,7 +19,7 @@
                 "detailed":true,
                 "gitpath":"../../../",
                 "comment": "each named capturing group of the regex will become a attribute inside tags. You can addapt this regex so it can match your needs",
-                "regex":"(?<version>((\\d\\.\\d(\\.\\d)?)([-\\w]*)))\\s+(?<message>.+)",
+                "regex":"(?<version>((\\d+\\.\\d+(\\.\\d+)?)([-\\w]*)))\\s+(?<message>.+)",
                 "regexop":""
             }
         }
