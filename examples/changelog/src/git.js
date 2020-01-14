@@ -142,15 +142,15 @@ function getTagMessage(str,regex){
 
 
 function orderByTag(a,b){
-    const aVersion =  a.version.split(/[.-]/g);
-    const bVersion =  b.version.split(/[.-]/g);
+    const aVersion =  a.version.split(/[.\-/#]/g);
+    const bVersion =  b.version.split(/[.\-/#]/g);
 
     return compareArrays(aVersion,bVersion);
 }
 
 function compareArrays(a,b){
-    const aCompare = a.shift() * 1;
-    const bCompare = b.shift() * 1;
+    const aCompare = a.shift().replace(/\D/,'') * 1;
+    const bCompare = b.shift().replace(/\D/,'') * 1;
     
     if(aCompare !== bCompare){
         return aCompare - bCompare;
