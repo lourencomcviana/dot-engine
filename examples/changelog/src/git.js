@@ -20,8 +20,12 @@ function processData(data,args,config){
         .then(item => data.branch=item)
         .then(()=>{
             return filterSqlFiles(gitUrl)
-                .then(tags=> tags
-                    .map(file=> getTagMessage(file,regex)))
+                .then(tags=> { 
+                        return tags.map(file=> getTagMessage(file,regex))
+                         .filter(tag => tag !=null)
+                    }
+                )
+                    
                 .then(tags =>  data.tags = tags.sort(orderByTag))
                 .then(tags => args.detailed ? insertCommitOnTags(tags,gitUrl) : tags.commits=[])
                 .catch(err=>{ console.error(err); return []});
@@ -130,13 +134,17 @@ function setBranchRemoteData(branch){
 }
 
 function getTagMessage(str,regex){
-    let m = regex.exec(str)
+    try{
+        let m = regex.exec(str)
 
-    if(m.groups){
-        return m.groups;
-    }else{
-        return str;
+        if(m.groups){
+            return m.groups;
+        }
+    }catch(err){
+        console.warn("versão "+str+" não pode ser interpretada pois não coincide com a regex, será desconsiderada",err);   
     }
+
+    return null;
 }
 
 
