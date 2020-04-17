@@ -38,16 +38,25 @@ function processData(data,args,config){
 
 async function insertCommitOnTags(tags,gitUrl){
     if(tags.length>0){
+        let tag;
+
+        let lastCommit = await getLastCommit(gitUrl);
+        let lastHash = lastCommit.hash
         oldTag = await getFirstCommit(gitUrl);
         oldTag = oldTag.hash;
         let boundary = "--boundary";
         for(var id in tags){
-            let tag = tags[id];
+            tag = tags[id];
             tag.commits = await commitsBetweenTags(oldTag,tag.version,gitUrl,boundary )
             oldTag =tag.version;
             boundary='';
         }
-        
+        let newTag = {
+            version: 'N/A',
+            message: lastCommit.message,
+        }
+        newTag.commits = await commitsBetweenTags(tag.version,lastHash,gitUrl,'' )
+        tags.push(newTag)
     }
     else{
         tags.commits = [];
@@ -55,11 +64,46 @@ async function insertCommitOnTags(tags,gitUrl){
     return tags;
 }
 
+// async function insertCommitOnTags(tags,gitUrl){
+//     if(tags.length>0){
+//         const lastCommit = getLastCommit(gitUrl).hash;
+//         let tag;
+
+//         let oldTag = await getFirstCommit(gitUrl);
+//         let oldTag = oldTag.hash;
+//         let boundary = "--boundary";
+//         for(var id in tags){
+//             tag = tags[id];
+//             tag.commits = await commitsBetweenTags(oldTag,tag.version,gitUrl,boundary )
+//             oldTag =tag.version;
+//             boundary='';
+//         }
+//         // let newTag = {}
+//         // newTag.commits = await commitsBetweenTags(tag,lastCommit,gitUrl,'' )
+//         // console.log(newTag)
+    
+//     }
+//     else{
+//         tags.commits = [];
+//     }
+//     return tags;
+// }
+
+
+        
+
 async function getFirstCommit(gitUrl){
     const simpleGit = require('simple-git/promise')(gitUrl);
     return simpleGit.log()
     .then(saida =>saida.all[saida.all.length-1])
 }
+
+async function getLastCommit(gitUrl){
+    const simpleGit = require('simple-git/promise')(gitUrl);
+    return simpleGit.log()
+    .then(saida =>{console.log(saida); return saida.all[0];})
+}
+
 async function commitsBetweenTags(startTag,endTag,gitUrl,boundary){
     //git log 1.7.53...1.7.54 --pretty=format:'|| %C(yellow)%h || %Cred%ad || %Cblue%an || %Cgreen%d || %Creset%s ||' 
     
