@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const path = require('path');
 const moment = require('moment');
-// need to export only one function, this function will be called by dot-engine 
+// need to export only one function, this function will be called by dot-engine
 // tree parameters are sent to the function
 // data: contains the data part of the configuration file, you can change its contents safelly
 // args: args passed specific to this funcion in configuration file.
@@ -9,31 +9,67 @@ const moment = require('moment');
 
 module.exports = processData;
 
+const config = {
+    "outDir":"../../",
+    "jst":"./models/*.jst",
+    "name":"auto-changelog.md",
+    "data":{
+        "appName":"dot-engine",
+
+        "branch":"current branch info will be inputed here",
+        "tags":[{
+            "version":"it will be replaced by src/git.js",
+            "message":"it will be replaced by src/git.js"
+        }]
+    },
+    "process": [
+        {
+            "comment": "collect all tags generated in git and split them betwen version and message",
+            "file": "src/git.js",
+            "args":{
+                "detailed":true,
+                "gitpath":"../../../",
+                "comment": "each named capturing group of the regex will become a attribute inside tags. You can addapt this regex so it can match your needs",
+                "regex":"(?<version>([vV]?[\\-\\.\\#]?(\\d+\\.\\d+(\\.\\d+)?)([\\#\\-.\\w]*)))\\s+(?<message>.+)",
+                "regexop":""
+            }
+        }
+    ]
+}
+// processData(config.data,
+// {
+//     "detailed":true,
+//     "gitpath":"../../../",
+//     "comment": "each named capturing group of the regex will become a attribute inside tags. You can addapt this regex so it can match your needs",
+//     "regex":"(?<version>([vV]?[\\-\\.\\#]?(\\d+\\.\\d+(\\.\\d+)?)([\\#\\-.\\w]*)))\\s+(?<message>.+)",
+//     "regexop":""
+// },
+// config)
 function processData(data,args,config){
 
     const regex = new RegExp(args.regex, args.regexop);
 
     const gitUrl = path.resolve(config.this,args.gitpath);
-    config.outDir = gitUrl; 
+    config.outDir = gitUrl;
 
     return getBranchInfo(gitUrl)
         .then(item => data.branch=item)
         .then(()=>{
             return filterSqlFiles(gitUrl)
-                .then(tags=> { 
+                .then(tags=> {
                         return tags.map(file=> getTagMessage(file,regex))
                          .filter(tag => tag !=null)
                     }
                 )
-                    
+
                 .then(tags =>  data.tags = tags.sort(orderByTag))
                 .then(tags => args.detailed ? insertCommitOnTags(tags,gitUrl) : tags.commits=[])
                 .catch(err=>{ console.error(err); return []});
         }).catch(err=>{ console.error(err); return []});
-    
 
-  
-    
+
+
+
 }
 
 async function insertCommitOnTags(tags,gitUrl){
@@ -81,7 +117,7 @@ async function insertCommitOnTags(tags,gitUrl){
 //         // let newTag = {}
 //         // newTag.commits = await commitsBetweenTags(tag,lastCommit,gitUrl,'' )
 //         // console.log(newTag)
-    
+
 //     }
 //     else{
 //         tags.commits = [];
@@ -90,7 +126,7 @@ async function insertCommitOnTags(tags,gitUrl){
 // }
 
 
-        
+
 
 async function getFirstCommit(gitUrl){
     const simpleGit = require('simple-git/promise')(gitUrl);
@@ -105,9 +141,9 @@ async function getLastCommit(gitUrl){
 }
 
 async function commitsBetweenTags(startTag,endTag,gitUrl,boundary){
-    //git log 1.7.53...1.7.54 --pretty=format:'|| %C(yellow)%h || %Cred%ad || %Cblue%an || %Cgreen%d || %Creset%s ||' 
-    
-    
+    //git log 1.7.53...1.7.54 --pretty=format:'|| %C(yellow)%h || %Cred%ad || %Cblue%an || %Cgreen%d || %Creset%s ||'
+
+
     const opts = [startTag+'...'+endTag];
 
     if(boundary){
@@ -132,7 +168,7 @@ function filterSqlFiles(giturl,regex){
 
     return simpleGit.tag(['-n'])
         .then(saida => saida.split("\n").filter(item =>item))
-    
+
 }
 
 function getBranchInfo(giturl){
@@ -165,12 +201,12 @@ function setBranchRemoteData(branch){
         branch.remote ={
             name: m[1],
             branch: m[2]
-        } 
+        }
     } else {
         branch.remote ={
             name: undefined,
             branch: undefined
-        } 
+        }
     }
 
 
@@ -185,7 +221,7 @@ function getTagMessage(str,regex){
             return m.groups;
         }
     }catch(err){
-        console.warn("versão "+str+" não pode ser interpretada pois não coincide com a regex, será desconsiderada",err);   
+        console.warn("versão "+str+" não pode ser interpretada pois não coincide com a regex, será desconsiderada",err);
     }
 
     return null;
@@ -203,14 +239,14 @@ function orderByTag(a,b){
 function compareArrays(a,b){
     const aCompare = a.shift().replace(/\D/,'') * 1;
     const bCompare = b.shift().replace(/\D/,'') * 1;
-    
+
     if(aCompare !== bCompare){
         return aCompare - bCompare;
     } else if(a.length>0 && b.length>0){
         return compareArrays(a,b);
-    } else if(a.length>0 && b.length===0){ 
+    } else if(a.length>0 && b.length===0){
         return 1;
-    } else if(a.length===0 && b.length>0){ 
+    } else if(a.length===0 && b.length>0){
         return -1;
     }else {
         return 0;
