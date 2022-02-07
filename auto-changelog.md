@@ -23,5 +23,7 @@ correção de vulnerabilidade
 - [05/11/2019 02:38:40 viana](git@github.com:lourencomcviana/dot-engine/commit/e058059b867248822f016d6cee69ec9e31036f68): first commit 
 - [05/11/2019 01:59:00 Lourenço Viana](git@github.com:lourencomcviana/dot-engine/commit/b0badd786f74dc5505f1375df2f3fb0065c339cd): Initial commit 
 
-## Release N/A
-correção de vulnerabilidade
+## Release 1.0.1
+ajustado auto changelog
+
+- [07/02/2022 10:08:37 Lourenco](git@github.com:lourencomcviana/dot-engine/commit/60dce86c0d36d4ce25975c3aa82050cf30660806): ajustado auto changelog 
